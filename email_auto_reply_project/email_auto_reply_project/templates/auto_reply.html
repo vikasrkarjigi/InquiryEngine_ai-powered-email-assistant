@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Reply Email Application</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 30px;
+        }
+        .container {
+            max-width: 700px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .reply-box {
+            background-color: #f1f3f5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+        .status-success {
+            color: green;
+            font-weight: bold;
+        }
+        .status-failed {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+
+    <script>
+        async function sendAutoReply() {
+            const emailContent = document.getElementById("emailInput").value;
+
+            const response = await fetch('/api/auto_reply_email', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: emailContent })
+            });
+
+            if (!response.ok) {
+                document.getElementById("status").innerText = "Failed to get reply";
+                document.getElementById("status").classList.add("status-failed");
+                return;
+            }
+
+            const data = await response.json();
+
+            document.getElementById("sender").innerText = data.sender_name || "Unknown";
+            document.getElementById("receiver").innerText = data.receiver_name || "Unknown";
+            document.getElementById("status").innerText = data.status.trim() || "Pending";
+
+            const questionsList = data.inquiry_questions || [];
+            const questionsHtml = questionsList.length > 0
+                ? questionsList.map(q => `<li>${q}</li>`).join('')
+                : '<li>No questions extracted.</li>';
+            document.getElementById("extractedQuestions").innerHTML = questionsHtml;
+
+            document.getElementById("replyMessage").innerText = data.reply || "No reply received.";
+
+            if (data.status.trim().toLowerCase() === "success") {
+                document.getElementById("status").classList.add("status-success");
+            } else {
+                document.getElementById("status").classList.add("status-failed");
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">Auto Reply Email Application</h2>
+
+        <div class="mb-3">
+            <label for="emailInput" class="form-label">Enter your email content:</label>
+            <textarea class="form-control" id="emailInput" rows="4"></textarea>
+        </div>
+
+        <button class="btn btn-primary w-100" onclick="sendAutoReply()">Send Auto Reply</button>
+
+        <div class="reply-box mt-4">
+            <h5><strong>Auto Reply:</strong></h5>
+            <p><strong>Sender:</strong> <span id="sender"></span></p>
+            <p><strong>Receiver:</strong> <span id="receiver"></span></p>
+            <p><strong>Extracted Questions:</strong></p>
+            <ul id="extractedQuestions"></ul>
+            <p><strong>Reply Message:</strong></p>
+            <p id="replyMessage"></p>
+            <p><strong>Status:</strong> <span id="status"></span></p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

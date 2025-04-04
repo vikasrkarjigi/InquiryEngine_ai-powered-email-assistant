@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Auto Reply Email</title>
+    <script>
+
+<!--        function sendAutoReply() {-->
+<!--            const data = {-->
+<!--                "content": "Hi, I have a question regarding my order satus. \-->
+<!--                Could you please  help me?"-->
+<!--            };-->
+
+            async function sendAutoReply() {
+            const emailContent = document.getElementById("emailInput").value;
+
+            const response = await fetch('/api/auto_reply_email', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: emailContent })
+            });
+
+            const data = await response.json();
+            document.getElementById("output").innerText = data.reply;
+        }
+
+    </script>
+</head>
+<body>
+    <h1>Welcome to the Auto Reply Email Page</h1>
+    <textarea id="emailInput" rows="4" cols="50" placeholder="Enter email content..."></textarea><br>
+    <!--Button to trigger API request -->
+    <button onclick="sendAutoReply()">Send Auto Reply Request</button>
+    <h3>Reply:</h3>
+    <p id="output"></p>
+</body>
+</html>
